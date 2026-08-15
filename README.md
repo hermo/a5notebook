@@ -107,10 +107,11 @@ thicker binding (more sheets) or a wider seam allowance.
 
 ### Sewing marks
 
-A dashed line with small end-ticks is drawn on the spine, confined to the
-sewable zone: from `\sewingmargin` to `210mm - \sewingmargin`, never
-touching the top/bottom edge. Use it as a guide for where to start/stop
-stitching when hand-sewing the binding. In `\generatenotebookduplex` it's
+Five tiny points are drawn on the spine as awl-punch guides for a 5-hole
+pamphlet stitch: one at the vertical center of the page, one pair at
+`\sewingmargin` from the top/bottom edges, and one pair at the midpoints
+between those and the center. Push the awl through each point to punch
+the holes before stitching. In `\generatenotebookduplex` the points are
 only drawn on the back (inside) of each sheet — the front is the
 outward-facing cover/spread you don't see while sewing through the fold
 from inside, so marking it would just be clutter.
@@ -160,7 +161,7 @@ not a LaTeX limitation. Test-print a page and tune `\strokewidth`,
   a quick preview (single-sided, not imposed — for visual preview only).
 - Page numbers in outer bottom corners
 - Solid, thin-stroke patterns for crisp output on monochrome laser printers
-- Binding gutter and dashed sewing-guide marks on the spine
+- Binding gutter and 5-hole pamphlet-stitch punch guides on the spine
 
 ## Before use
 

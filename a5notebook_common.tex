@@ -6,22 +6,23 @@
 \def\linespacing{7}     % Spacing between ruled lines (mm)
 \def\gridspacing{7}     % Square grid size (mm)
 \def\dotspacing{5}      % Spacing between dots (mm)
-\def\dotsize{0.15}      % Dot radius (mm)
+\def\dotsize{0.13}      % Dot radius (mm)
 % Ink darkness (0-100) and stroke width. A monochrome laser printer has no
 % true gray - light tints get halftoned and thin/small features can print
 % patchy. Solid (or near-solid) ink at a thin width prints crisper than a
 % light gray fill; tune width for lightness instead of shade. Test-print
 % and adjust to taste.
-\def\shadeval{100}      % Ink darkness percentage
-\def\strokewidth{0.15}  % Line width for ruled/grid/dot marks (mm)
-\def\pagemargin{10}     % Outer side margin (mm)
-\def\gutter{3}           % Extra margin on the spine side, for binding (mm)
-\def\vtopmargin{10}      % Top margin (mm)
-\def\vbottommargin{15}   % Bottom margin (mm) - leaves room for the page number
-\def\sewingmargin{12}   % Sewing marks stay this far from the top/bottom (mm)
-\def\startpage{1}       % Starting page number
-\def\numsheets{20}      % A4 sheets to generate (each sheet = 2 A5 pages,
-                        % single-sided) - 20 sheets = 40 A5 pages
+\def\shadeval{100}        % Ink darkness percentage
+\def\strokewidth{0.15}    % Line width for ruled/grid/dot marks (mm)
+\def\pagemargin{10}       % Outer side margin (mm)
+\def\gutter{3}            % Extra margin on the spine side, for binding (mm)
+\def\vtopmargin{10}       % Top margin (mm)
+\def\vbottommargin{15}    % Bottom margin (mm) - leaves room for the page number
+\def\sewingmargin{12}     % Outer sewing holes stay this far from the top/bottom (mm)
+\def\sewingpointsize{0.3} % Radius of the awl-punch guide points (mm)
+\def\startpage{1}         % Starting page number
+\def\numsheets{20}        % A4 sheets to generate (each sheet = 2 A5 pages,
+                          % single-sided) - 20 sheets = 40 A5 pages
 
 % Calculate centering offset
 \def\startx{0mm}
@@ -78,11 +79,12 @@
             % The dot nearest the spine sits exactly \dotspacing+\gutter
             % from the spine (mirrored on both pages); any leftover from
             % non-integer division falls on the outer edge instead. The
-            % top dot sits exactly \dotspacing from the top border;
-            % bottom uses \vbottommargin so dots don't collide with the
-            % page number.
+            % top and bottom dots both sit exactly \dotspacing from their
+            % respective border, so the grid fills the whole page instead
+            % of stopping short at \vbottommargin - it's fine for dots to
+            % overlap the page number since they're tiny.
             \pgfmathtruncatemacro{\ndotcols}{floor((148.5-\dotmarginright-\dotmarginleft)/\dotspacing)}
-            \pgfmathtruncatemacro{\ndotrows}{floor((210-\dotspacing-\vbottommargin)/\dotspacing)}
+            \pgfmathtruncatemacro{\ndotrows}{floor((210-2*\dotspacing)/\dotspacing)}
             \foreach \i in {0,...,\ndotcols} {
                 \foreach \j in {0,...,\ndotrows} {
                     \ifnum#5=0
@@ -99,24 +101,28 @@
 
         % Page number - left or right based on position
         \ifdim#1<74mm % Left page
-            \node[black!70] at (\marginleft mm,7mm) {\small #4};
+            \node[black!100] at (\marginleft mm,7mm) {\small\bfseries #4};
         \else % Right page
-            \node[black!70] at ({148.5mm-\marginright mm},7mm) {\small #4};
+            \node[black!100] at ({148.5mm-\marginright mm},7mm) {\small\bfseries #4};
         \fi
     \end{scope}
 }
 
-% Binding/sewing guide on the spine between the two facing pages: a dashed
-% line with end ticks, confined to the sewable zone (from \sewingmargin to
-% 210mm-\sewingmargin) so it never touches the top/bottom edge.
+% Binding/sewing guide on the spine between the two facing pages: five tiny
+% points marking where to punch holes with an awl for a 5-hole pamphlet
+% stitch - one at the vertical center, one pair at \sewingmargin from the
+% top/bottom edges, and one pair at the midpoints between those and the
+% center.
 % #1 = spine x-offset expression
 \newcommand{\spinemarker}[1]{%
-    \draw[black!45,densely dashed,line width=\strokewidth mm]
-        ({#1},\sewingmargin mm) -- ({#1},{210mm-\sewingmargin mm});
-    \draw[black!45,line width=\strokewidth mm]
-        ({#1-2mm},\sewingmargin mm) -- ({#1+2mm},\sewingmargin mm);
-    \draw[black!45,line width=\strokewidth mm]
-        ({#1-2mm},{210mm-\sewingmargin mm}) -- ({#1+2mm},{210mm-\sewingmargin mm});
+    \pgfmathsetmacro{\sewtop}{\sewingmargin}
+    \pgfmathsetmacro{\sewbottom}{210-\sewingmargin}
+    \pgfmathsetmacro{\sewcenter}{105}
+    \pgfmathsetmacro{\sewuppermid}{(\sewtop+\sewcenter)/2}
+    \pgfmathsetmacro{\sewlowermid}{(\sewcenter+\sewbottom)/2}
+    \foreach \sewy in {\sewtop,\sewuppermid,\sewcenter,\sewlowermid,\sewbottom} {
+        \fill[black!45] ({#1},\sewy mm) circle[radius=\sewingpointsize mm];
+    }
 }
 
 % Generate \numsheets A4 sheets of a single page style, each holding two
